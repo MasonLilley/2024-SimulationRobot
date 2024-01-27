@@ -14,13 +14,16 @@ import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class Robot extends LoggedRobot {
   private final Joystick controller1 = new Joystick(0);
@@ -36,6 +39,11 @@ public class Robot extends LoggedRobot {
   private final Timer m_timer = new Timer();
   private Trajectory m_trajectory;
 
+  private MechanismLigament2d m_elevator;
+  private MechanismLigament2d m_wrist;
+  private static final double kElevatorMinimumLength = 0.5;
+  Mechanism2d mech = new Mechanism2d(3, 3);
+
   @Override
   public void robotInit() {
     Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
@@ -47,13 +55,25 @@ public class Robot extends LoggedRobot {
             List.of(),
             new Pose2d(6, 4, new Rotation2d()),
             new TrajectoryConfig(2, 2));
+
+    MechanismRoot2d root = mech.getRoot("climber", 2, 0);
+
+    m_elevator = root.append(new MechanismLigament2d("elevator", kElevatorMinimumLength, 90));
+    m_wrist =
+      m_elevator.append(
+        new MechanismLigament2d("wrist", 0.5, 90, 6, new Color8Bit(Color.kPurple)));
+    Logger.recordOutput("Test Mech2d", mech);
   }
 
   @Override
   public void robotPeriodic() {
     m_drive.periodic();
     Logger.recordOutput("Test", 1);
-  }
+
+    m_elevator.setLength(kElevatorMinimumLength + Math.abs(controller1.getY()*2));
+    m_wrist.setAngle((controller1.getZ())*60);
+    Logger.recordOutput("Test Mech2d2", mech);
+    }
 
   @Override
   public void autonomousInit() {

@@ -1,6 +1,8 @@
 {
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Test Mech2d": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Test Mech2d2": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Field": "Field2d"
     }
@@ -24,6 +26,9 @@
     }
   },
   "NetworkTables Info": {
+    "Connections": {
+      "open": true
+    },
     "visible": true
   }
 }
